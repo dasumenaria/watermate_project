@@ -1,7 +1,0 @@
-#set the server administrator email
-SetEnv SERVER_ADMIN info@nmcorp.info
-
-
-Options -Indexes
-# or #
-IndexIgnore *
