@@ -14,7 +14,7 @@ class HandlerController extends AppController
 	
 	public function beforeFilter() 
 	{
-        Configure::write('debug',0);
+       // Configure::write('debug',0);
     }
 	
 	/////// Start Page Name Function //////////
@@ -23,10 +23,10 @@ class HandlerController extends AppController
                 {
                                 $this->layout='ajax_layout';
                                 $this->loadmodel('record');
-                                                $form=date("Y-m-d");
-                                                $from=date('Y-m-d',strtotime($form." -1 day"));
-                                                $conditions=array('record.record_flag'=>0,'record.status_date'=> $from);;
-                                                $to=$from;
+                                $form=date("Y-m-d");
+                                $from=date('Y-m-d',strtotime($form." -1 day"));
+                                $conditions=array('record.record_flag'=>0,'record.status_date'=> $from);;
+                                $to=$from;
                                 $this->set(compact('from'));
                                 $this->set(compact('to'));
                                
@@ -1084,6 +1084,28 @@ class HandlerController extends AppController
 		$user_id=$this->Session->read('user_id');
 		$this->loadmodel('module');
 		return $fetch_menu = $this->module->find('all',array('order' => 'preferance ASC'));
+	}
+	public function user_right() 
+	{
+		$this->layout='index_layout';
+ 		$this->loadmodel('login');
+		$this->set('fetch_login', $this->login->find('all',array('conditions' =>array('role !='=> 0))));		
+		if($this->request->is('post'))
+		{
+			if(isset($this->request->data['right_submit']))
+			{
+				$this->loadmodel('user_right');
+				if(empty($this->request->data['module_id']))
+				{$this->request->data['module_id']=0;}
+				$this->request->data['module_id']=implode(',', $this->request->data['module_id']);
+				
+				 $conditions=array("user_id" => $this->request->data['user_id']);
+				 $fetch_user_right = $this->user_right->find('all',array('conditions'=>$conditions));
+				
+				$this->user_right->id=$fetch_user_right['0']['user_right']['id'];
+				$this->user_right->save($this->request->data);
+			}
+		}
 	}
 	function user_rights()
 	{
