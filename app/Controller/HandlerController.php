@@ -123,9 +123,7 @@ class HandlerController extends AppController
 						$this->set('wrong4', 'Email Id and Password are Incorrect.');
 					}	
 				}
-				
 		}
-		
 	}
 	
 	public function index() 
@@ -1059,6 +1057,209 @@ class HandlerController extends AppController
 			$this->set('file_name', $this->request->data['pdf']);
 		}
 	}
+	
+	public function booking_status()
+	{
+		$this->layout='index_layout'; 
+		$this->loadmodel('bookingtrip');
+		$this->loadmodel('user_login');
+		//$this->set('bookingtrip' , $this->bookingtrip->find('all',array('conditions'=>array('village_flag'=>1),'order'=>array('id DESC' ))));
+		$this->Paginator->settings = array(
+        //'conditions' => array('village.village_flag'=>1),
+        'limit' => 10,
+		'order'=>'id DESC'
+		);
+		$result_booking = $this->Paginator->paginate('bookingtrip');
+		$this->set(compact('result_booking'));
+		
+		if($this->request->is('post'))
+		{
+			if(isset($this->request->data['ticket_booking']))
+			{
+				$site_url='http://phppoets.com/watermate/'; 
+				$update_id=$this->request->data['update_id'];
+				$trip_id=$this->request->data['trip_id'];
+				$user_id=$this->request->data['user_id'];
+				//- EXTA
+				$file_name=$this->request->form['ticket']['name'];
+				$ext = pathinfo($file_name, PATHINFO_EXTENSION);
+				//- New File Name
+				$filenames=time();
+				$targetPath=@$filenames.'.'.$ext;
+				$target = WWW_ROOT."uploaded_bill/".$trip_id; 
+				$display_path="uploaded_bill/".$trip_id."/";
+				$inserr_path=$site_url.$display_path.$targetPath;
+				 
+				$exist = is_dir($target);  
+				if(!$exist)
+				{
+					$folder = new Folder();
+					$folder->create(WWW_ROOT . 'uploaded_bill' . DS . $trip_id . DS);
+				}
+  				//move_uploaded_file(@$this->request->form['ticket']['tmp_name'],@$target);
+				move_uploaded_file($this->request->form['ticket']['tmp_name'], $target."/".$targetPath);
+				$this->bookingtrip->updateAll(array('status'=>'"2"'), array('id'=>$update_id));
+				
+				$this->loadmodel('travel_mapping');
+				$travel_mappins=$this->travel_mapping->find('all',array('conditions'=>array('trip_id'=>$trip_id,'user_id'=>$user_id)));
+				$travel_mappins_id=$travel_mappins[0]['travel_mapping']['id'];
+				//-- bill datas
+				$this->loadmodel('bill_datas');
+				$this->bill_datas->saveAll(array('user_id'=>"$user_id",'travel_mapping_id'=>"$travel_mappins_id",'image_path'=>"'$inserr_path'"));
+ 				//-- Notification
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$device_token=$key_serch[0]['user_login']['device_token'];
+				$auth_key=$key_serch[0]['user_login']['auth_key'];
+				
+					$message='Your ticket booked by admin';
+					$title='Booking';
+					$date=date("M d Y");
+					$time=date("h:i A");
+					 
+					$msg = array
+					(
+						'title' => $title,
+						'message' 	=> $message,
+						'button_text'	=> 'View',
+						'link'	=> 'watermate://bookingtrips?id='.$update_id,
+						'notification_id'	=> $update_id,
+						'status_code' => 2,
+						'image_path' => $inserr_path,
+					);
+ 					$url = 'https://fcm.googleapis.com/fcm/send';
+ 					$fields = array
+					(
+						'registration_ids' 	=> array($device_token),
+						'data'			=> $msg
+					);
+					$headers = array
+					(
+						'Authorization: key=' .$auth_key,
+						'Content-Type: application/json'
+					);
+					// CURL
+					json_encode($fields);
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, true);
+					curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+					$result = curl_exec($ch);
+					curl_close($ch);
+				
+				
+				$this->redirect(array('action' => 'booking_status')); 
+				
+			}
+			if(isset($this->request->data['user_booking']))
+			{
+				$update_id=$this->request->data['update_id'];
+				$user_id=$this->request->data['user_id'];
+				$this->bookingtrip->updateAll(array('status'=>'"3"'), array('id'=>$update_id));
+				//-- Notification
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$device_token=$key_serch[0]['user_login']['device_token'];
+				$auth_key=$key_serch[0]['user_login']['auth_key'];
+				
+					$message='Your ticket booking confirm';
+					$title='Booking';
+					$date=date("M d Y");
+					$time=date("h:i A");
+					 
+					$msg = array
+					(
+						'title' => $title,
+						'message' 	=> $message,
+						'button_text'	=> 'View',
+						'link'	=> 'watermate://bookingtrips?id='.$update_id,
+						'notification_id'	=> $update_id,
+						'status_code' => 3,
+						
+					);
+ 					$url = 'https://fcm.googleapis.com/fcm/send';
+ 					$fields = array
+					(
+						'registration_ids' 	=> array($device_token),
+						'data'			=> $msg
+					);
+					$headers = array
+					(
+						'Authorization: key=' .$auth_key,
+						'Content-Type: application/json'
+					);
+					// CURL
+					json_encode($fields);
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, true);
+					curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+					$result = curl_exec($ch);
+					curl_close($ch);
+				
+				$this->redirect(array('action' => 'booking_status')); 
+			}
+			if(isset($this->request->data['reject_booking']))
+			{
+				$reason=$this->request->data['reason'];
+				$update_id=$this->request->data['update_id'];
+				$user_id=$this->request->data['user_id'];
+				$this->bookingtrip->updateAll(array('status'=>'"4"','reason'=>"'$reason'"), array('id'=>$update_id));
+				//-- Notification
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$device_token=$key_serch[0]['user_login']['device_token'];
+				$auth_key=$key_serch[0]['user_login']['auth_key'];
+				
+					$message='Your ticket booking rejected';
+					$title='Booking';
+					$date=date("M d Y");
+					$time=date("h:i A");
+					 
+					$msg = array
+					(
+						'title' => $title,
+						'message' 	=> $message,
+						'button_text'	=> 'View',
+						'link'	=> 'watermate://bookingtrips?id='.$update_id,
+						'notification_id'	=> $update_id,
+						'status_code' => 4,
+						
+					);
+ 					$url = 'https://fcm.googleapis.com/fcm/send';
+ 					$fields = array
+					(
+						'registration_ids' 	=> array($device_token),
+						'data'			=> $msg
+					);
+					$headers = array
+					(
+						'Authorization: key=' .$auth_key,
+						'Content-Type: application/json'
+					);
+					// CURL
+					json_encode($fields);
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, true);
+					curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+					$result = curl_exec($ch);
+					curl_close($ch);
+ 				
+				$this->redirect(array('action' => 'booking_status')); 
+			}
+		}
+		
+	}
 	/////// End Page Name Function //////////
 	
 	/////// Start Calling Function //////////
@@ -1408,18 +1609,26 @@ class HandlerController extends AppController
 		}
 		
 	}
+
 	/////// End Calling Function //////////
+	
+	function loginDataFetch($user)
+	{
+		$this->loadmodel('user_login');
+		return $this->user_login->find('all',array('conditions'=>array("user_id" => $user)));
+	}
+	
 function ajax_delete_record(){
 $this->loadmodel('record');
 $auto_id = $this->request->query('con');
-$result=$this->record->UpdateAll(array('record_flag'=>1), array('id'=>$auto_id));
+$result=$this->record->UpdateAll(array('record_flag' => 1), array('id'=>$auto_id));
 
 }	
 ////////
 function ajax_undo_record(){
 $this->loadmodel('record');
 $auto_id = $this->request->query('con');
-$result=$this->record->UpdateAll(array('record_flag'=>0), array('id'=>$auto_id));
+$result=$this->record->UpdateAll(array('record_flag' => 0), array('id'=>$auto_id));
 }
 ///////
 function ajax_del_record(){

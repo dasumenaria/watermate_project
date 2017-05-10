@@ -560,8 +560,17 @@ class API extends REST {
 		$date_of_travel = $this->_request['date_of_travel'];
 		$trip_id=(string)mt_rand(1000,9999);
 		$status=1;
+			//-- Mpping
+			//- traval insert echo
+			$mapping_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type)VALUES(:user_id,:trip_id,:type)");
+			$mapping_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
+			$mapping_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
+			$mapping_insert->bindParam(":type", $type, PDO::PARAM_STR);
+			$mapping_insert->execute();
+			$mapping_id = $this->db->lastInsertId();
 			//- Bookin  Insert
-			$NOTY_insert = $this->db->prepare("INSERT into bookingtrips(user_id,trip_id,type,travel_from,travel_to,date_of_travel,status)VALUES(:user_id,:trip_id,:type,:travel_from,:travel_to,:date_of_travel,:status)");
+			$NOTY_insert = $this->db->prepare("INSERT into bookingtrips(user_id,trip_id,type,travel_from,travel_to,date_of_travel,status,travel_mapping_id)VALUES(:user_id,:trip_id,:type,:travel_from,:travel_to,:date_of_travel,:status,:travel_mapping_id)");
+			$NOTY_insert->bindParam(":travel_mapping_id", $mapping_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":travel_from", $from, PDO::PARAM_STR);
@@ -620,36 +629,7 @@ class API extends REST {
 		$success = array('status'=> true, "Error" => "Booking successfully submitted",'Responce' => $result);
 		$this->response($this->json($success), 200);  		
 	}
-	
-	public function BookingStatus() 
-	{
-		global $link;
-		include_once("common/global.inc.php");
-		if ($this->get_request_method() != "POST") {
-            $this->response('', 406);
-        }
-		@$user_id = $this->_request['user_id'];
- 		 
-		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE user_id=:user_id  order by `id` DESC");
-		$sql->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
- 		$sql->execute();
-		
-		if ($sql->rowCount()>0) { 
-			$row_gp = $sql->fetch(PDO::FETCH_ASSOC);
-			foreach($row_gp as $key=>$valye)	
-			{
-				$string_insert[$key]=$row_gp[$key];
-			}
- 			$success = array('status' => true, "Error" => '', 'login' => $string_insert);
-			$this->response($this->json($success), 200);
-		}
-		else
-		{
-			$success = array('status' => false, "Error" => 'No data found ', 'Responce' => 0);
-			$this->response($this->json($success), 200);
-		}
-	}
-	
+ 	
 	public function BookingData() 
 	{
 		global $link;
@@ -659,7 +639,7 @@ class API extends REST {
         }
 		@$user_id = $this->_request['user_id'];
  		 
-		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE user_id=:user_id");
+		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE user_id=:user_id status='1' order by id DESC");
  		$sql->bindParam(":user_id", $user_id, PDO::PARAM_STR);
 		$sql->execute();
 		
@@ -713,7 +693,51 @@ class API extends REST {
 		 
  	}
 	
-	
+	public function ProjectData() 
+	{
+		global $link;
+		include_once("common/global.inc.php");
+		if ($this->get_request_method() != "POST") {
+            $this->response('', 406);
+        }
+ 		$sql = $this->db->prepare("SELECT * FROM projects order by project_name ASC");
+  		$sql->execute();
+ 		if ($sql->rowCount()>0) { 
+		
+			while($row_gp = $sql->fetch(PDO::FETCH_ASSOC))
+			{
+				echo  $id=$row_gp['id'];
+				$sub = $this->db->prepare("SELECT * FROM sub_projects WHERE project_id=:id ");
+				$sub->bindParam(":id", $id, PDO::PARAM_STR);
+				$sub->execute();
+				while($row_gps = $sub->fetch(PDO::FETCH_ASSOC))
+				{	
+					foreach($row_gps as $key=>$valyes)	
+					{
+						$string_inserta[$key]=$row_gps[$key];
+					}
+					$strings[]=$string_inserta;
+					unset($string_inserta);
+				} 
+				  
+				foreach($row_gp as $key=>$valye)	
+				{
+					$string_insert[$key]=$row_gp[$key];
+				}
+				$string_insert['sub_project']=$strings;
+				unset($strings);
+				$string[]=$string_insert;
+				unset($string_insert);
+			}
+ 			 $success = array('status' => true, "Error" => 'All records', 'projects' => $string);
+			 $this->response($this->json($success), 200);
+		}
+		else
+		{
+			$success = array('status' => false, "Error" => 'No data found ', 'Responce' => 0);
+			$this->response($this->json($success), 200);
+		}
+ 	}
 	
 
 	function distance($lat1, $lon1, $lat2, $lon2, $unit) 
