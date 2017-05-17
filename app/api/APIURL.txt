@@ -1,0 +1,24 @@
+http://phppoets.com/watermate/app/api/LocationAccess
+
+http://phppoets.com/watermate/app/api/BillUpload
+
+http://phppoets.com/watermate/app/api/login
+// user_id = admin@amritjalpariyojana.com
+
+http://phppoets.com/watermate/app/api/TokenUpdate
+
+http://phppoets.com/watermate/app/api/OTPVerification
+
+http://phppoets.com/watermate/app/api/forgot_password
+
+http://phppoets.com/watermate/app/api/ChangePassword
+
+http://phppoets.com/watermate/app/api/BookingTrip
+
+http://phppoets.com/watermate/app/api/BookingData
+
+http://phppoets.com/watermate/app/api/BookingData
+
+http://phppoets.com/watermate/app/api/BookingCancel
+
+

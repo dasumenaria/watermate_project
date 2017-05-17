@@ -8,16 +8,16 @@ class API extends REST {
 
     public $data = "";
 	
-	const DB_SERVER = "localhost";
+/*	const DB_SERVER = "localhost";
 	const DB_USER = "root";
 	const DB_PASSWORD = "";
 	const DB = "hansahie_watermate";  
 
-/*	const DB_SERVER = "localhost";
-	const DB_USER = "phppoets_water";
-	const DB_PASSWORD = "wKVkpR_yM_&}";
-	const DB = "phppoets_watermate";       
-*/ 
+/**/	const DB_SERVER = "localhost";
+	const DB_USER = "phppoets_WATER";
+	const DB_PASSWORD = "(4-[HNJ*-VB8";
+	const DB = "phppoets_water";       
+ 
     private $db = NULL;
 
     public function __construct() 
@@ -70,11 +70,11 @@ class API extends REST {
 		$timestamp=date('Y-m-d h:i:s');
  		$user_id = $this->_request['user_id']; 
 		$locationData = $this->_request['locationData'];
-		$started= (bool)$this->_request['started'];
-		$completed= (bool)$this->_request['completed'];
+		$started=  $this->_request['started'];
+		$completed= $this->_request['completed'];
 		$type = $this->_request['type'];
  
- 		if($started === true)
+ 		if($started == true)
 		{    	$trip_id=(string)mt_rand(1000,9999);
 			//- traval insert
 				$NOTY_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type)VALUES(:user_id,:trip_id,:type)");
@@ -102,7 +102,7 @@ class API extends REST {
 					$location_insert->execute();
  				}
 									
-			if($completed === true)
+			if($completed == true)
 			{
 				$sql_update_travel = $this->db->prepare("UPDATE `travel_mappings` SET status='1' WHERE id='".$insert_id."'");
 				$sql_update_travel->execute();
@@ -111,12 +111,13 @@ class API extends REST {
 			{}
 			//Image find On google
 				$image_stingfor_google;
-				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';
+				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';  
 				$time = time();
-				$desFolder = '../images/';
-				$imageName = 'google-map_'.$time.'.jpg';
+				$desFolder = dirname(__FILE__).'/../webroot/images/LatLongImg/';
+				$imageName = 'google-map_'.$time.'.PNG';
 				$imagePath = $desFolder.$imageName;
-				$im_pth='images/'.$imageName;
+				$im_pth='images/LatLongImg/'.$imageName;
+
 				file_put_contents($imagePath,file_get_contents($src));
 				$img_path=$site_url.$im_pth;
 			//-- Distance
@@ -139,7 +140,8 @@ class API extends REST {
 				{
 					// update last  inseted
 					$ftc_data= $std_nm->fetchALL(PDO::FETCH_ASSOC);
-					$insert_id=$ftc_data['id'];
+
+					 $insert_id=$ftc_data[0]['id'];
 					
 					$locationArray= json_decode($locationData, true);
 					$image_stingfor_google='';
@@ -195,7 +197,7 @@ class API extends REST {
 						
 				}
 
-			if($completed === true)
+			if($completed == true)
 			{
 				$sql_update_travel = $this->db->prepare("UPDATE `travel_mappings` SET status='1' WHERE id='".$insert_id."'");
 				$sql_update_travel->execute();
@@ -204,12 +206,13 @@ class API extends REST {
 			{}
  			//Image find On google
 				$image_stingfor_google;
-				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';
+				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';  
 				$time = time();
-				$desFolder = '../images/';
-				$imageName = 'google-map_'.$time.'.jpg';
+				$desFolder = dirname(__FILE__).'/../webroot/images/LatLongImg/';
+				$imageName = 'google-map_'.$time.'.PNG';
 				$imagePath = $desFolder.$imageName;
-				$im_pth='images/'.$imageName;
+				$im_pth='images/LatLongImg/'.$imageName;
+
 				file_put_contents($imagePath,file_get_contents($src));
 				$img_path=$site_url.$im_pth;
 			//-- Distance
@@ -234,8 +237,12 @@ class API extends REST {
 		$type = (string)$this->_request['type'];
 		$user_id = (int)$this->_request['user_id'];
 		@$trip_id = (int)$this->_request['trip_id'];
-		//$completed= (bool)$this->_request['completed'];
-		//$started= (bool)$this->_request['started'];
+		//-- new  from,to,amount,extra_charges
+		@$from = $this->_request['from'];
+		@$to = $this->_request['to'];
+		@$amount = $this->_request['amount'];
+		@$extra_charges = $this->_request['extra_charges'];
+		 
 		$no_of_image= $this->_request['no_of_image'];
  		$DS='/';
  		@$tmpname = $_FILES['bill_image']['tmp_name'];
@@ -249,14 +256,18 @@ class API extends REST {
 			$trip_id=(string)mt_rand(1000,9999);
 			$filenames=time();
 			$targetPath=@$filenames.'.'.$ext;
-			$target = "../uploaded_bill/".$trip_id;
+			$target ="../webroot/uploaded_bill/".$trip_id;
 			$display_path="uploaded_bill/".$trip_id."/";
 			$inserr_path=$site_url.$display_path.$targetPath;
 			//- traval insertecho
-				$NOTY_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type)VALUES(:user_id,:trip_id,:type)");
+				$NOTY_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type,from,to,amount,extra_charges)VALUES(:user_id,:trip_id,:type,:from,:to,:amount,:extra_charges)");
 				$NOTY_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 				$NOTY_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
 				$NOTY_insert->bindParam(":type", $type, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":from", $from, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":to", $to, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":amount", $amount, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":extra_charges", $extra_charges, PDO::PARAM_STR);
 				$NOTY_insert->execute();
 				$insert_id = $this->db->lastInsertId();
 			//--- Insert Image Table
@@ -275,7 +286,7 @@ class API extends REST {
 		$completed = false;
                 $all_uploaded = false;
 		if($no_of_image==1 || $no_of_image==$total_images){ $completed=true; $all_uploaded = 'true' ;}
-			if($completed === true)
+			if($completed == true)
 			{
 				$sql_update_travel = $this->db->prepare("UPDATE `travel_mappings` SET status='1' WHERE id='".$insert_id."'");
 				$sql_update_travel->execute();
@@ -287,7 +298,7 @@ class API extends REST {
 		{
 			$filenames=time();
 			$targetPath=@$filenames.'.'.$ext;
-			$target = "../uploaded_bill/".$trip_id;
+			$target ="../webroot/uploaded_bill/".$trip_id;
 			$display_path="uploaded_bill/".$trip_id."/";
 			$inserr_path=$site_url.$display_path.$targetPath;
 			
@@ -312,7 +323,7 @@ class API extends REST {
                 $all_uploaded = false;
 		if($no_of_image==1 || $no_of_image==$total_images){ $completed=true; $all_uploaded = 'true' ;}
 
-			if($completed === true)
+			if($completed == true)
 			{
 				$sql_update_travel = $this->db->prepare("UPDATE `travel_mappings` SET status='1' WHERE id='".$insert_id."'");
 				$sql_update_travel->execute();
@@ -324,7 +335,8 @@ class API extends REST {
 		$exist = is_dir($target);  
  		if(!$exist)
 		{
-			mkdir(dirname(__FILE__)."/../uploaded_bill/" . $DS . $trip_id);
+			mkdir(dirname(__FILE__)."/../webroot/uploaded_bill/" . $DS . $trip_id);
+ 
  		}
  		move_uploaded_file($tmpname, dirname(__FILE__)."/".$target."/".$targetPath);
 		
@@ -347,27 +359,33 @@ class API extends REST {
 		if ($this->get_request_method() != "POST") {
             $this->response('', 406);
         }
+
+ 
 		$timestamp=date('Y-m-d h:i:s');
-		$user_id = (string)$this->_request['user_id'];
+		$user_id = $this->_request['user_id'];
 		//$password = (string)$this->_request['password'];
 		
 		if(!empty($user_id))
-		{
+		{ 
 			$md5pass=md5($password);
-			$ingcount = $this->db->prepare("SELECT * FROM `login` where user_id='".$user_id."'");
+ 
+			$ingcount = $this->db->prepare("SELECT * FROM `user_logins` where email='".$user_id."'");
 			$ingcount->execute();
+ 
  			if($ingcount->rowCount() > 0)
 			{
 				$row_gp = $ingcount->fetch(PDO::FETCH_ASSOC);
-				$update_id=$row_gp['id'];
+ 
+				$update_id=$row_gp['user_id']; 
 				$mobile_no=$row_gp['mobile_no'];
-				$user_id=$row_gp['user_id'];
+				$username=$row_gp['username'];
 				$random=(string)mt_rand(1000,9999);
-				$sms=str_replace(' ', '+', 'Dear '.$user_id.', Your one time password is '.$random.'.');
+				$sms=str_replace(' ', '+', 'Dear '.$username.', Your one time password is '.$random.'.');
 				$working_key='A7a76ea72525fc05bbe9963267b48dd96';
 				$sms_sender='FLEXIL';
-				file_get_contents('http://alerts.sinfini.com/api/web2sms.php?workingkey='.$working_key.'&sender='.$sms_sender.'&to='.$mobile_no.'&message='.$sms.'');
- 				$update = $this->db->prepare("update `login` set `otp` = '".$random."' where id='".$update_id."'");
+				$x=file_get_contents('http://alerts.sinfini.com/api/web2sms.php?workingkey='.$working_key.'&sender='.$sms_sender.'&to='.$mobile_no.'&message='.$sms.'');
+
+ 				$update = $this->db->prepare("update `user_logins` set `otp` = '".$random."' where user_id='".$update_id."'");
 				$update->execute();
 			
 				foreach($row_gp as $key=>$valye)	
@@ -400,13 +418,13 @@ class API extends REST {
 		}
 		$device_token=$this->_request['device_token'];
 		$id=$this->_request['id'];
-		$sql = $this->db->prepare("SELECT * FROM login WHERE id=:id");
+		$sql = $this->db->prepare("SELECT * FROM user_logins WHERE user_id=:id");
 		$sql->bindParam(":id", $id, PDO::PARAM_STR);
 		$sql->execute();
 		
 		if($sql->rowCount()>0)
 		{
-			$sql_update_token = $this->db->prepare("UPDATE `login` SET device_token='".$device_token."' WHERE id='".$id."' LIMIT 1;");
+			$sql_update_token = $this->db->prepare("UPDATE `user_logins` SET device_token='".$device_token."' WHERE user_id='".$id."'");
 			$sql_update_token->execute();
 			$success = array('status' => true, "msg" => 'Yes', 'Responce' => '');
 			$this->response($this->json($success), 200);
@@ -428,7 +446,7 @@ class API extends REST {
 		if(isset($this->_request['otp']))
 		{
 			@$otp = $this->_request['otp'];
-			$sql = $this->db->prepare("SELECT * FROM login WHERE otp=:otp");
+			$sql = $this->db->prepare("SELECT * FROM user_logins WHERE otp=:otp");
 			$sql->bindParam(":otp", $otp, PDO::PARAM_STR);
 			$sql->execute();
 			if ($sql->rowCount()>0) { 
@@ -437,10 +455,10 @@ class API extends REST {
 					{
 						$string_insert[$key]=$row_gp[$key];
 					}
-				$id = $row_gp['id'];
+				$id = $row_gp['user_id'];
 				
 				$random='';
-				$sql_insert = $this->db->prepare("update `login` set otp=:random where id=:id");
+				$sql_insert = $this->db->prepare("update `user_logins` set otp=:random where user_id=:id");
 				$sql_insert->bindParam(":random", $random, PDO::PARAM_STR);
 				$sql_insert->bindParam(":id", $id, PDO::PARAM_STR);
 				$sql_insert->execute();
@@ -470,13 +488,13 @@ class API extends REST {
 			if(isset($this->_request['mobile_no']))
 			{
 				@$email = $this->_request['mobile_no'];
- 				$sql1 = $this->db->prepare("SELECT * FROM login WHERE mobile_no=:mobile_no");
+ 				$sql1 = $this->db->prepare("SELECT * FROM user_logins WHERE mobile_no=:mobile_no");
 				$sql1->bindParam(":mobile_no", $email, PDO::PARAM_STR);
 				$sql1->execute();
 				if ($sql1->rowCount()>0) 
 				{ 
 					$row_gp1 = $sql1->fetch(PDO::FETCH_ASSOC);
-					$update_id=$row_gp1['id'];
+					$update_id=$row_gp1['user_id'];
  					$random=(string)mt_rand(1000,9999);
 					$time=date('h:i:s a', time());
 					$date=date("d-m-Y");
@@ -487,7 +505,7 @@ class API extends REST {
 					file_get_contents('http://alerts.sinfini.com/api/web2sms.php?workingkey='.$working_key.'&sender='.$sms_sender.'&to='.$email.'&message='.$sms1.'');
 					$pass_MD5=md5($random);
 								
-					$sql_update1 = $this->db->prepare("update `login` set password=:pass_MD5,otp=:random where id=:id");
+					$sql_update1 = $this->db->prepare("update `user_logins` set password=:pass_MD5,otp=:random where user_id=:id");
 					$sql_update1->bindParam(":id", $update_id, PDO::PARAM_INT);
 					$sql_update1->bindParam(":pass_MD5", $pass_MD5, PDO::PARAM_INT);
 					$sql_update1->bindParam(":random", $random, PDO::PARAM_INT);
@@ -518,22 +536,22 @@ class API extends REST {
 				@$mobile_no = $this->_request['mobile_no'];
 				@$otp = $this->_request['otp'];
 				@$password = $this->_request['password'];
- 				$sql1 = $this->db->prepare("SELECT * FROM login WHERE mobile_no=:mobile_no AND otp=:otp ");
+ 				$sql1 = $this->db->prepare("SELECT * FROM user_logins WHERE mobile_no=:mobile_no AND otp=:otp ");
 				$sql1->bindParam(":mobile_no", $mobile_no, PDO::PARAM_STR);
 				$sql1->bindParam(":otp", $otp, PDO::PARAM_STR);
 				$sql1->execute();
 				if ($sql1->rowCount()>0) 
 				{ 
 					$row_gp1 = $sql1->fetch(PDO::FETCH_ASSOC);
-					$update_id=$row_gp1['id'];
+					$update_id=$row_gp1['user_id'];
  					$pass_MD5=md5($password);
 								
-					$sql_update1 = $this->db->prepare("update `login` set password=:pass_MD5 where id=:id AND otp=:random");
+					$sql_update1 = $this->db->prepare("update `user_logins` set password=:pass_MD5 where user_id=:id AND otp=:random");
 					$sql_update1->bindParam(":id", $update_id, PDO::PARAM_INT);
 					$sql_update1->bindParam(":pass_MD5", $pass_MD5, PDO::PARAM_INT);
-					$sql_update1->bindParam(":random", $random, PDO::PARAM_INT);
+					$sql_update1->bindParam(":random", $otp, PDO::PARAM_INT);
  					$sql_update1->execute();
-					$result=array('otp'=>$random);
+					$result=array('otp'=>$otp);
 					$error = array('status' => true, "Error" => "Password Successfully changed", 'Response' => $result);
 					$this->response($this->json($error), 200);
 				
@@ -550,18 +568,18 @@ class API extends REST {
 	{
 		include_once("common/global.inc.php");
 		if ($this->get_request_method() != "POST") {
-            $this->response('', 406);
-        }
+	            $this->response('', 406);
+	        }
 		$timestamp=date('Y-m-d h:i:s');
-		$type = (string)$this->_request['type'];
-		$user_id = (int)$this->_request['user_id'];
+		$type = $this->_request['type'];
+		$user_id = $this->_request['user_id'];
 		$from = $this->_request['from'];
-		$to = (string)$this->_request['to'];
+		$to = $this->_request['to'];
 		$date_of_travel = $this->_request['date_of_travel'];
+		$dateoftravel=date('Y-m-d', strtotime($date_of_travel));
 		$trip_id=(string)mt_rand(1000,9999);
 		$status=1;
-			//-- Mpping
-			//- traval insert echo
+		//- traval insert echo
 			$mapping_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type)VALUES(:user_id,:trip_id,:type)");
 			$mapping_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 			$mapping_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
@@ -575,15 +593,18 @@ class API extends REST {
 			$NOTY_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":travel_from", $from, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":travel_to", $to, PDO::PARAM_STR);
-			$NOTY_insert->bindParam(":date_of_travel", $date_of_travel, PDO::PARAM_STR);
+			$NOTY_insert->bindParam(":date_of_travel", $dateoftravel, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":type", $type, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":status", $status, PDO::PARAM_STR);
 			$NOTY_insert->execute();
 			$insert_id = $this->db->lastInsertId();
 			//--- Notification
-				$std_nm = $this->db->prepare("SELECT `device_token`,`auth_key` FROM `login` where id='".$user_id."'");
+
+ 
+				$std_nm = $this->db->prepare("SELECT `device_token`,`auth_key` FROM user_logins where user_id='".$user_id."'");
 				$std_nm->execute();
 				$ftc_nm= $std_nm->fetch(PDO::FETCH_ASSOC);
+ 
 				$device_token = $ftc_nm['device_token'];
 				$notification_key = $ftc_nm['auth_key'];
 					
@@ -623,6 +644,7 @@ class API extends REST {
 					curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
 					$result = curl_exec($ch);
+
 					curl_close($ch);
 			
 		$result=array('timestamp' => $timestamp,'trip_id' => $trip_id,'user_id' => $user_id,"status" => $status);
@@ -637,19 +659,33 @@ class API extends REST {
 		if ($this->get_request_method() != "POST") {
             $this->response('', 406);
         }
-		@$user_id = $this->_request['user_id'];
- 		 
-		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE user_id=:user_id status='1' order by id DESC");
+
+		 $user_id = $this->_request['user_id'];
+ 		  
+		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE user_id=:user_id AND status !=5 order by recent_activity DESC");
  		$sql->bindParam(":user_id", $user_id, PDO::PARAM_STR);
 		$sql->execute();
-		
+		 
 		if ($sql->rowCount()>0) { 
 			while($row_gp = $sql->fetch(PDO::FETCH_ASSOC))
 			{
+				$travel_mapping_id=$row_gp['travel_mapping_id'];
+				$check_both = $this->db->prepare("SELECT * FROM bill_datas WHERE travel_mapping_id=:travel_mapping_id AND user_id =:user_id");
+				$check_both->bindParam(":travel_mapping_id", $travel_mapping_id, PDO::PARAM_STR);
+				$check_both->bindParam(":user_id", $user_id, PDO::PARAM_STR);
+				$check_both->execute();
+if ($check_both->rowCount()>0) { 
+				$stds = $check_both->fetch(PDO::FETCH_ASSOC);
+				$image_path=$stds['image_path']; $image_path=str_replace("'","","$image_path"); 
+}else
+{$image_path='';
+}
+				
 				foreach($row_gp as $key=>$valye)	
 				{
 					$string_insert[$key]=$row_gp[$key];
 				}
+				$string_insert['image_path']=$image_path;
 				$string[]=$string_insert;
 			}
  			$success = array('status' => true, "Error" => '', 'bookingtrips' => $string);
@@ -667,14 +703,14 @@ class API extends REST {
 		global $link;
 		include_once("common/global.inc.php");
 		if ($this->get_request_method() != "POST") {
-            $this->response('', 406);
-        }
+	            $this->response('', 406);
+	        }
 		@$id = $this->_request['id'];
-		@$trip_id = $this->_request['trip_id'];
+		//@$trip_id = $this->_request['trip_id'];
 		 
-		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE id=:id AND trip_id=:trip_id");
+		$sql = $this->db->prepare("SELECT * FROM bookingtrips WHERE id=:id ");
 		$sql->bindParam(":id", $id, PDO::PARAM_STR);
-		$sql->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
+		//$sql->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 		$sql->execute();
 		$updatestatus=5;
 		if ($sql->rowCount()>0) { 
@@ -706,7 +742,7 @@ class API extends REST {
 		
 			while($row_gp = $sql->fetch(PDO::FETCH_ASSOC))
 			{
-				echo  $id=$row_gp['id'];
+				$id=$row_gp['id'];
 				$sub = $this->db->prepare("SELECT * FROM sub_projects WHERE project_id=:id ");
 				$sub->bindParam(":id", $id, PDO::PARAM_STR);
 				$sub->execute();

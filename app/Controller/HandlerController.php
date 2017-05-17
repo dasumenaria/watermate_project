@@ -1098,7 +1098,7 @@ class HandlerController extends AppController
 				}
   				//move_uploaded_file(@$this->request->form['ticket']['tmp_name'],@$target);
 				move_uploaded_file($this->request->form['ticket']['tmp_name'], $target."/".$targetPath);
-				$this->bookingtrip->updateAll(array('status'=>'"2"'), array('id'=>$update_id));
+				$this->bookingtrip->updateAll(array('status'=>'"2"','image_path'=>"'$inserr_path'"), array('id'=>$update_id));
 				
 				$this->loadmodel('travel_mapping');
 				$travel_mappins=$this->travel_mapping->find('all',array('conditions'=>array('trip_id'=>$trip_id,'user_id'=>$user_id)));
@@ -1107,7 +1107,7 @@ class HandlerController extends AppController
 				$this->loadmodel('bill_datas');
 				$this->bill_datas->saveAll(array('user_id'=>"$user_id",'travel_mapping_id'=>"$travel_mappins_id",'image_path'=>"'$inserr_path'"));
  				//-- Notification
-				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('user_id'=>$user_id)));
 				$device_token=$key_serch[0]['user_login']['device_token'];
 				$auth_key=$key_serch[0]['user_login']['auth_key'];
 				
@@ -1160,7 +1160,7 @@ class HandlerController extends AppController
 				$user_id=$this->request->data['user_id'];
 				$this->bookingtrip->updateAll(array('status'=>'"3"'), array('id'=>$update_id));
 				//-- Notification
-				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('user_id'=>$user_id)));
 				$device_token=$key_serch[0]['user_login']['device_token'];
 				$auth_key=$key_serch[0]['user_login']['auth_key'];
 				
@@ -1212,7 +1212,7 @@ class HandlerController extends AppController
 				$user_id=$this->request->data['user_id'];
 				$this->bookingtrip->updateAll(array('status'=>'"4"','reason'=>"'$reason'"), array('id'=>$update_id));
 				//-- Notification
-				$key_serch=$this->user_login->find('all',array('conditions'=>array('id'=>$user_id)));
+				$key_serch=$this->user_login->find('all',array('conditions'=>array('user_id'=>$user_id)));
 				$device_token=$key_serch[0]['user_login']['device_token'];
 				$auth_key=$key_serch[0]['user_login']['auth_key'];
 				
