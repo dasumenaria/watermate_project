@@ -8,16 +8,17 @@ class API extends REST {
 
     public $data = "";
 	
-/*	const DB_SERVER = "localhost";
+	const DB_SERVER = "localhost";
 	const DB_USER = "root";
 	const DB_PASSWORD = "";
 	const DB = "hansahie_watermate";  
 
-/**/	const DB_SERVER = "localhost";
+/*
+	const DB_SERVER = "localhost";
 	const DB_USER = "phppoets_WATER";
 	const DB_PASSWORD = "(4-[HNJ*-VB8";
 	const DB = "phppoets_water";       
- 
+*/
     private $db = NULL;
 
     public function __construct() 
@@ -93,7 +94,7 @@ class API extends REST {
 					if($x != 1){$image_stingfor_google.='|';}
  					$latitude= $latLong['latitude'];
 					$longitude= $latLong['longitude'];
-					$image_stingfor_google.=$latitude.',-'.$longitude;
+					$image_stingfor_google.=$latitude.','.$longitude;
 				//--- Insert LOcation
 					$location_insert = $this->db->prepare("INSERT into location_datas(travel_mapping_id,latitude,longitude)VALUES(:travel_mapping_id,:latitude,:longitude)");
 					$location_insert->bindParam(":travel_mapping_id", $insert_id, PDO::PARAM_STR);
@@ -111,7 +112,8 @@ class API extends REST {
 			{}
 			//Image find On google
 				$image_stingfor_google;
-				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';  
+				//$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.''; 
+				$src='https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&path=color:0xff0000ff|weight:5|'.$image_stingfor_google.'&zoom=15&size=600x400'; 
 				$time = time();
 				$desFolder = dirname(__FILE__).'/../webroot/images/LatLongImg/';
 				$imageName = 'google-map_'.$time.'.PNG';
@@ -154,7 +156,7 @@ class API extends REST {
 						if($x != 1){$image_stingfor_google.='|';}
 						$latitude= $latLong['latitude'];
 						$longitude= $latLong['longitude'];
-						$image_stingfor_google.=$latitude.',-'.$longitude;
+						$image_stingfor_google.=$latitude.','.$longitude;
 					//--- Insert LOcation
 						$location_insert = $this->db->prepare("INSERT into location_datas(travel_mapping_id,latitude,longitude)VALUES(:travel_mapping_id,:latitude,:longitude)");
 						$location_insert->bindParam(":travel_mapping_id", $insert_id, PDO::PARAM_STR);
@@ -186,7 +188,7 @@ class API extends REST {
 						if($x != 1){$image_stingfor_google.='|';}
 						$latitude= $latLong['latitude'];
 						$longitude= $latLong['longitude'];
-						$image_stingfor_google.=$latitude.',-'.$longitude;
+						$image_stingfor_google.=$latitude.','.$longitude;
 					//--- Insert LOcation
 						$location_insert = $this->db->prepare("INSERT into location_datas(travel_mapping_id,latitude,longitude)VALUES(:travel_mapping_id,:latitude,:longitude)");
 						$location_insert->bindParam(":travel_mapping_id", $insert_id, PDO::PARAM_STR);
@@ -206,7 +208,8 @@ class API extends REST {
 			{}
  			//Image find On google
 				$image_stingfor_google;
-				$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.'';  
+				//$src = 'https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&zoom=15&size=600x400&maptype=roadmap&path='.$image_stingfor_google.''; 
+				$src='https://maps.googleapis.com/maps/api/staticmap?center='.$latitude.','.$longitude.'&path=color:0xff0000ff|weight:5|'.$image_stingfor_google.'&zoom=15&size=600x400';  
 				$time = time();
 				$desFolder = dirname(__FILE__).'/../webroot/images/LatLongImg/';
 				$imageName = 'google-map_'.$time.'.PNG';
@@ -242,7 +245,7 @@ class API extends REST {
 		@$to = $this->_request['to'];
 		@$amount = $this->_request['amount'];
 		@$extra_charges = $this->_request['extra_charges'];
-		 
+		
 		$no_of_image= $this->_request['no_of_image'];
  		$DS='/';
  		@$tmpname = $_FILES['bill_image']['tmp_name'];
@@ -260,14 +263,14 @@ class API extends REST {
 			$display_path="uploaded_bill/".$trip_id."/";
 			$inserr_path=$site_url.$display_path.$targetPath;
 			//- traval insertecho
-				$NOTY_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id,type,from,to,amount,extra_charges)VALUES(:user_id,:trip_id,:type,:from,:to,:amount,:extra_charges)");
+				$NOTY_insert = $this->db->prepare("INSERT into travel_mappings(user_id,trip_id, type,travel_from,travel_to,amount,extra_charges)VALUES(:user_id,:trip_id,:types, :froms,:tos,:amounts,:extra_chargess)");
 				$NOTY_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 				$NOTY_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
-				$NOTY_insert->bindParam(":type", $type, PDO::PARAM_STR);
-				$NOTY_insert->bindParam(":from", $from, PDO::PARAM_STR);
-				$NOTY_insert->bindParam(":to", $to, PDO::PARAM_STR);
-				$NOTY_insert->bindParam(":amount", $amount, PDO::PARAM_STR);
-				$NOTY_insert->bindParam(":extra_charges", $extra_charges, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":types", $type, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":froms", $from, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":tos", $to, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":amounts", $amount, PDO::PARAM_STR);
+				$NOTY_insert->bindParam(":extra_chargess", $extra_charges, PDO::PARAM_STR);
 				$NOTY_insert->execute();
 				$insert_id = $this->db->lastInsertId();
 			//--- Insert Image Table
@@ -570,7 +573,7 @@ class API extends REST {
 		if ($this->get_request_method() != "POST") {
 	            $this->response('', 406);
 	        }
-		$timestamp=date('Y-m-d h:i:s');
+		$timestamp=date('Y-m-d H:i:s');
 		$type = $this->_request['type'];
 		$user_id = $this->_request['user_id'];
 		$from = $this->_request['from'];
@@ -587,7 +590,7 @@ class API extends REST {
 			$mapping_insert->execute();
 			$mapping_id = $this->db->lastInsertId();
 			//- Bookin  Insert
-			$NOTY_insert = $this->db->prepare("INSERT into bookingtrips(user_id,trip_id,type,travel_from,travel_to,date_of_travel,status,travel_mapping_id)VALUES(:user_id,:trip_id,:type,:travel_from,:travel_to,:date_of_travel,:status,:travel_mapping_id)");
+			$NOTY_insert = $this->db->prepare("INSERT into bookingtrips(user_id,trip_id,type,travel_from,travel_to,date_of_travel,status,travel_mapping_id,recent_activity)VALUES(:user_id,:trip_id,:type,:travel_from,:travel_to,:date_of_travel,:status,:travel_mapping_id,:recent_activity)");
 			$NOTY_insert->bindParam(":travel_mapping_id", $mapping_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":trip_id", $trip_id, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":user_id", $user_id, PDO::PARAM_STR);
@@ -596,6 +599,7 @@ class API extends REST {
 			$NOTY_insert->bindParam(":date_of_travel", $dateoftravel, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":type", $type, PDO::PARAM_STR);
 			$NOTY_insert->bindParam(":status", $status, PDO::PARAM_STR);
+			$NOTY_insert->bindParam(":recent_activity", $timestamp, PDO::PARAM_STR);
 			$NOTY_insert->execute();
 			$insert_id = $this->db->lastInsertId();
 			//--- Notification
